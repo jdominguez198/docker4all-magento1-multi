@@ -1,0 +1,39 @@
+# Mark Shust's Docker Configuration for Magento (https://github.com/markoshust/docker-magento)
+# Version 12.0.0
+
+version: "3"
+
+services:
+  web:
+    build: images/nginx
+    ports:
+    - 8091:8000
+    links:
+    - db
+    - app
+    volumes: &appvolumes
+    - ../../www/web:/var/www/html:delegated
+    - ../../www:/var/www/vhosts:delegated
+    - ../../vhosts:/etc/nginx/conf.d/vhosts:delegated
+    - ~/.composer:/var/www/.composer:delegated
+    - sockdata:/sock
+  app:
+    build: images/php
+    volumes: *appvolumes
+    links:
+    - db
+  db:
+    image: mysql:5.7
+    volumes:
+    - dbdata:/var/lib/mysql
+    restart: always
+    environment:
+    - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    - MYSQL_DATABASE=${MYSQL_DATABASE}
+    - MYSQL_USER=${MYSQL_USER}
+    - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+
+volumes:
+  dbdata:
+  sockdata:
+
